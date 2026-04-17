@@ -1,5 +1,5 @@
-function Footer({ nome, ano }) {
-    return <p>{nome} - {ano}</p>;
-  }
-  
-  export default Footer;
+function Footer() {
+  return null;
+}
+
+export default Footer;

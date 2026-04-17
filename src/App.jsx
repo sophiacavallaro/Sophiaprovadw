@@ -1,70 +1,37 @@
 import { useState, useEffect } from "react";
-import StatusBar from "./components/StatusBar";
-import Footer from "./components/Footer";
-import Imagem from "./components/Imagem";
-import "./App.css";
+import Login from "./components/Login";
+import Cadastro from "./components/Cadastro";
+import Home from "./components/Home";
+import { auth } from "./firebase";
+import { onAuthStateChanged } from "firebase/auth";
 
 function App() {
-  const [alunos, setAlunos] = useState([]);
-  const [nome, setNome] = useState("");
-  const [curso, setCurso] = useState("");
+  const [user, setUser] = useState(null);
+  const [tela, setTela] = useState("login");
 
   useEffect(() => {
-    console.log("Carregou");
+    const unsubscribe = onAuthStateChanged(auth, (usuario) => {
+      setUser(usuario);
+    });
+
+    return () => unsubscribe();
   }, []);
 
-  function adicionar() {
-    if (!nome || !curso) return;
-
-    setAlunos([...alunos, { nome, curso }]);
-    setNome("");
-    setCurso("");
-  }
-
-  return (
-    <div>
-      <StatusBar mensagem="Sistema Acadêmico" />
-  
-      <div className="container">
-        <div className="card">
-  
-          {/* imagem */}
-          <img
-            src="https://cdn.pixabay.com/photo/2013/07/13/12/43/kids-160168_1280.png"
-            className="imagem"
-          />
-  
-          {/* formulário */}
-          <div className="form">
-            <h2>Alunos</h2>
-  
-            <input
-              placeholder="Nome"
-              value={nome}
-              onChange={(e) => setNome(e.target.value)}
-            />
-  
-            <input
-              placeholder="Curso"
-              value={curso}
-              onChange={(e) => setCurso(e.target.value)}
-            />
-  
-            <button onClick={adicionar}>Adicionar</button>
-  
-            {alunos.map((a, i) => (
-              <p key={i}>
-                {a.nome} - {a.curso}
-              </p>
-            ))}
-          </div>
-  
-        </div>
+  // 🔒 NÃO LOGADO
+  if (!user) {
+    return (
+      <div className="auth-container">
+        {tela === "login" ? (
+          <Login setUser={setUser} setTela={setTela} />
+        ) : (
+          <Cadastro setTela={setTela} />
+        )}
       </div>
-  
-      <Footer nome="Seu Nome" ano="2026" />
-    </div>
-  );
+    );
   }
 
-  export default App;
+  // ✅ LOGADO
+  return <Home />;
+}
+
+export default App;
